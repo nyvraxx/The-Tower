@@ -5,6 +5,8 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -12,12 +14,22 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
  * First screen of the application. Displayed after the application is created.
  */
 public class MainMenu implements Screen {
+	Main main;
 	Stage stage;
 	SpriteBatch spriteBatch;
 
-	public MainMenu() {
+	public MainMenu(Main main) {
+		this.main = main;
 		stage = new Stage(new FitViewport(1f, 1f));
 		spriteBatch = new SpriteBatch();
+
+		stage.addListener(new InputListener() {
+			@Override
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+				main.setScreen(new GameScreen(new GameManager()));
+				return true; // Return true if the event was handled
+			}
+		});
 	}
 
 	@Override
@@ -32,9 +44,9 @@ public class MainMenu implements Screen {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		//just for testing
+		// just for testing
 		spriteBatch.begin();
-		spriteBatch.draw(new Texture("ohno.png"), 0, 0, 0.5f, 1f);
+		spriteBatch.draw(new Texture("ohno.png"), 0, 0, 1f, 1f);
 		spriteBatch.end();
 
 	}
@@ -42,7 +54,6 @@ public class MainMenu implements Screen {
 	@Override
 	public void resize(int width, int height) {
 		stage.getViewport().update(width, height);
-		// Resize your screen here. The parameters represent the new window size.
 	}
 
 	@Override
@@ -62,6 +73,7 @@ public class MainMenu implements Screen {
 
 	@Override
 	public void dispose() {
-		// Destroy screen's assets here.
+		stage.dispose();
+		spriteBatch.dispose();
 	}
 }
