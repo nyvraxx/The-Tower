@@ -19,8 +19,8 @@ gwt {
   minHeapSize = '1G'
 
   src = files(file('src/main/java')) // Needs to be in front of "modules" below.
-  modules 'com.nyvraxx.spacebuilder.GdxDefinition'
-  devModules 'com.nyvraxx.spacebuilder.GdxDefinitionSuperdev'
+  modules 'com.nyvraxx.apcsagameproject.GdxDefinition'
+  devModules 'com.nyvraxx.apcsagameproject.GdxDefinitionSuperdev'
   project.webAppDirName = 'webapp'
 
   compiler.strict = true

@@ -1,4 +1,4 @@
-package com.nyvraxx.spacebuilder;
+package com.nyvraxx.apcsagameproject;
 
 import com.badlogic.gdx.Game;
 
@@ -6,6 +6,6 @@ import com.badlogic.gdx.Game;
 public class Main extends Game {
     @Override
     public void create() {
-        setScreen(new FirstScreen());
+        setScreen(new MainMenu());
     }
 }

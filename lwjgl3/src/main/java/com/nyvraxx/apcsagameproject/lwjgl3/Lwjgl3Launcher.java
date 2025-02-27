@@ -1,8 +1,8 @@
-package com.nyvraxx.spacebuilder.lwjgl3;
+package com.nyvraxx.apcsagameproject.lwjgl3;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import com.nyvraxx.spacebuilder.Main;
+import com.nyvraxx.apcsagameproject.Main;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
