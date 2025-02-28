@@ -26,7 +26,7 @@ public class MainMenu implements Screen {
 		stage.addListener(new InputListener() {
 			@Override
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-				main.setScreen(new GameScreen(new GameManager()));
+				main.setScreen(new GameScreen(new WorldManager()));
 				return true; // Return true if the event was handled
 			}
 		});

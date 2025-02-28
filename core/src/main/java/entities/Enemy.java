@@ -6,7 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
-import com.nyvraxx.apcsagameproject.GameManager;
+import com.nyvraxx.apcsagameproject.WorldManager;
 
 public class Enemy {
 	private static BodyDef defaultBodyDef;
@@ -29,7 +29,7 @@ public class Enemy {
 		defaultFixtureDef.density = 0.05f;
 	}
 
-	GameManager gameManager;
+	WorldManager worldManager;
 	World world;
 	private float acceleration;
 	Body body;
@@ -38,15 +38,15 @@ public class Enemy {
 		return body;
 	}
 
-	public Enemy(GameManager gameManager) {
+	public Enemy(WorldManager worldManager) {
 		acceleration = 0.4f;
-		this.gameManager = gameManager;
+		this.worldManager = worldManager;
 	}
 
 	public void update(float delta) {
 		// TODO implement more sophisticated pathfinding here
 		Vector2 thisPos = body.getTransform().getPosition();
-		Vector2 playerPos = gameManager.getPlayer().getBody().getTransform().getPosition();
+		Vector2 playerPos = worldManager.getPlayer().getBody().getTransform().getPosition();
 		float dx = -thisPos.x + playerPos.x;
 		float dy = -thisPos.y + playerPos.y;
 		float epsilon = 0.001f;

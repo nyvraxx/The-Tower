@@ -22,7 +22,7 @@ public class Backpack {
 	private void trustedAdd(ItemPlacement itemPlacement) {
 		int width = itemPlacement.getWidth();
 		int height = itemPlacement.getHeight();
-
+		
 		int x = itemPlacement.x;
 		int y = itemPlacement.y;
 
