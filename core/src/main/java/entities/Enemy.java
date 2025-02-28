@@ -1,28 +1,16 @@
 package entities;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.World;
+import com.nyvraxx.apcsagameproject.GameManager;
 
-import items.Inventory;
-
-public class Player {
-	private float walkAcceleration;
-	private float runAcceleration;
-	private float staminaChargeRate;
-
-	Inventory inventory;
-
-	boolean running = false;
+public class Enemy {
 	private static BodyDef defaultBodyDef;
 	private static FixtureDef defaultFixtureDef;
-
-	public float maxStamina;
-	public float stamina;
-	Body body;
-
 	static {
 		defaultBodyDef = new BodyDef();
 
@@ -30,6 +18,7 @@ public class Player {
 		defaultBodyDef.allowSleep = false;
 		defaultBodyDef.active = true;
 		defaultBodyDef.fixedRotation = true;
+		defaultBodyDef.angularDamping = 4f;
 		defaultBodyDef.linearDamping = 8f;
 
 		defaultFixtureDef = new FixtureDef();
@@ -40,50 +29,36 @@ public class Player {
 		defaultFixtureDef.density = 0.05f;
 	}
 
+	GameManager gameManager;
+	World world;
+	private float acceleration;
+	Body body;
+
 	public Body getBody() {
 		return body;
 	}
 
-	public Player() {
-		inventory = new Inventory();
-
-		walkAcceleration = 1f;
-		runAcceleration = 2.1f;
-		staminaChargeRate = 0.3f;
-
-		maxStamina = 7f;
-		stamina = maxStamina;
-	}
-
-	public void startRunning() {
-		running = true;
-	}
-
-	public void stopRunning() {
-		running = false;
+	public Enemy(GameManager gameManager) {
+		acceleration = 0.4f;
+		this.gameManager = gameManager;
 	}
 
 	public void update(float delta) {
-		if (!running) {
-			stamina = Math.min(maxStamina, stamina + delta * staminaChargeRate);
-		}
-	}
-
-	public void move(float dx, float dy, float delta) {
-		if (dx == 0 && dy == 0)
-			return;
-
-		if (running && stamina >= 0) {
-			body.applyForceToCenter(dx * runAcceleration, dy * runAcceleration, false);
-			stamina -= delta;
-		} else {
-			running = false;
-			body.applyForceToCenter(dx * walkAcceleration, dy * walkAcceleration, false);
-		}
+		// TODO implement more sophisticated pathfinding here
+		Vector2 thisPos = body.getTransform().getPosition();
+		Vector2 playerPos = gameManager.getPlayer().getBody().getTransform().getPosition();
+		float dx = -thisPos.x + playerPos.x;
+		float dy = -thisPos.y + playerPos.y;
+		float epsilon = 0.001f;
+		float invMag = (float) (1.0 / Math.sqrt(dx * dx + dy * dy + epsilon));
+		dx *= invMag;
+		dy *= invMag;
+		body.applyForceToCenter(dx * acceleration, dy * acceleration, true);
 	}
 
 	public void addToWorld(World world, float x, float y) {
 		body = world.createBody(defaultBodyDef);
 		body.createFixture(defaultFixtureDef);
 	}
+
 }

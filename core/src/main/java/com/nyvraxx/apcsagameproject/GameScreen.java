@@ -19,12 +19,15 @@ public class GameScreen implements Screen {
 	SpriteBatch spriteBatch;
 	Box2DDebugRenderer debugRenderer;
 
+	GameUIManager gameUIManager;
+	
 	OrthographicCamera camera;
 	FitViewport viewport;
 	Stage stage;
 	GameManager gameManager;
 
 	public GameScreen(GameManager gameManager) {
+		gameUIManager = new GameUIManager();
 		this.gameManager = gameManager;
 
 		spriteBatch = new SpriteBatch();
@@ -52,7 +55,7 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		Vector2 playerPos = gameManager.player.getBody().getPosition();
+		Vector2 playerPos = gameManager.getPlayer().getBody().getPosition();
 		camera.position.lerp(new Vector3(playerPos.x, playerPos.y, 0), 0.3f);
 		camera.update();
 
@@ -90,13 +93,13 @@ public class GameScreen implements Screen {
 		dy *= invMag;
 
 		if (Gdx.input.isKeyJustPressed(Input.Keys.SHIFT_LEFT)) {
-			gameManager.player.startRunning();
+			gameManager.getPlayer().startRunning();
 		} else if (!Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-			gameManager.player.stopRunning();
+			gameManager.getPlayer().stopRunning();
 		}
 		
-		System.out.println(gameManager.player.stamina);
-		gameManager.player.move(dx, dy, delta);
+		System.out.println(gameManager.getPlayer().stamina);
+		gameManager.getPlayer().move(dx, dy, delta);
 	}
 
 	@Override
