@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -32,27 +33,41 @@ public class WorldManager {
 		stage = new Stage(getViewport());
 
 		player = new Player();
-		player.setLevel(1);
+		player.setLevel(2);
 		gameWorld.add(player);
 
 		// TODO debug code
-		
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			Entity entity = new Zombie();
 			entity.setLevel(0);
 			gameWorld.add(entity);
-			entity.getBody().setTransform(MathUtils.random(), MathUtils.random(), MathUtils.random(MathUtils.PI));
+			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
 		}
-		for (int i = 0; i < 10; i++) {
-			Entity entity = new Zombie();
-			entity.setLevel(1);
-			gameWorld.add(entity);
-			entity.getBody().setTransform(MathUtils.random(), MathUtils.random(), MathUtils.random(MathUtils.PI));
+		{
+			PolygonShape shape = new PolygonShape();
+			shape.setAsBox(1f, 1f);
+			Platform platform = new Platform(2, shape);
+			gameWorld.add(platform);
 		}
-
+		{
+			PolygonShape shape = new PolygonShape();
+			shape.setAsBox(2f, 1f);
+			Platform platform = new Platform(1, shape);
+			gameWorld.add(platform);
+			platform.getBody().setTransform(3, 0, 0);
+		}
+		{
+			PolygonShape shape = new PolygonShape();
+			shape.setAsBox(2f, 1f);
+			Platform platformtest = new Platform(1, shape);
+			gameWorld.add(platformtest);
+			platformtest.getBody().setTransform(3, 2, 0);
+			
+		}
 	}
 
 	public void update(float delta) {
+
 		gameWorld.update(delta);
 
 		Vector2 playerPos = player.getBody().getPosition();

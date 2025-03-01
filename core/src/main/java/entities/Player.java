@@ -40,7 +40,7 @@ public class Player extends Entity {
 
 	public Player() {
 		super();
-		
+
 		inventory = new Inventory();
 
 		walkAcceleration = 1f;
@@ -77,6 +77,11 @@ public class Player extends Entity {
 			running = false;
 			getBody().applyForceToCenter(dx * walkAcceleration, dy * walkAcceleration, false);
 		}
+	}
+
+	@Override
+	public void setLevel(int level) {
+		super.setLevel(level);
 	}
 
 	@Override
