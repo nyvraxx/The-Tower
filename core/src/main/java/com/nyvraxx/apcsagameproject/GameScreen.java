@@ -4,7 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+
+import world.WorldManager;
 
 public class GameScreen implements Screen {
 	float worldWidth = 10f, worldHeight = 10f;
@@ -18,7 +19,7 @@ public class GameScreen implements Screen {
 		gameRenderer = new GameRenderer(worldManager);
 		
 		inputMultiplexer = new InputMultiplexer();
-		inputMultiplexer.addProcessor(worldManager.stage);
+		inputMultiplexer.addProcessor(worldManager.getStage());
 		
 		this.worldManager = worldManager;
 		
@@ -48,7 +49,7 @@ public class GameScreen implements Screen {
 
 	@Override
 	public void resize(int width, int height) {
-		worldManager.viewport.update(width, height);
+		worldManager.getViewport().update(width, height);
 	}
 
 	@Override

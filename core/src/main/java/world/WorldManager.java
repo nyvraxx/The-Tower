@@ -1,64 +1,63 @@
-package com.nyvraxx.apcsagameproject;
+package world;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
-import entities.Enemy;
+import entities.Entity;
 import entities.Player;
+import entities.Zombie;
 
 public class WorldManager {
 	Stage stage;
-	World world;
-	Player player;
 
+	Player player;
+	GameWorld gameWorld;
 	OrthographicCamera camera;
 	FitViewport viewport;
 
-	Array<Enemy> enemies = new Array<Enemy>();
 	private float viewWidth = 10f, viewHeight = 10f;
 
 	public WorldManager() {
+		gameWorld = new GameWorld();
 		camera = new OrthographicCamera();
 		camera.position.set(0, 0, 0);
 		viewport = new FitViewport(viewWidth, viewHeight, camera);
-		stage = new Stage(viewport);
-
-		world = new World(Vector2.Zero, true);
+		stage = new Stage(getViewport());
 
 		player = new Player();
-		getPlayer().addToWorld(world, 0, 0);
+		player.setLevel(1);
+		gameWorld.add(player);
 
-		// TODO debug code{
-		for (int i = 0; i < 10; i++) {
-			Enemy enemy = new Enemy(this);
-			enemy.addToWorld(world, MathUtils.random(10), MathUtils.random(10));
-			enemies.add(enemy);
+		// TODO debug code
+		
+		for (int i = 0; i < 100; i++) {
+			Entity entity = new Zombie();
+			entity.setLevel(0);
+			gameWorld.add(entity);
+			entity.getBody().setTransform(MathUtils.random(), MathUtils.random(), MathUtils.random(MathUtils.PI));
 		}
+		for (int i = 0; i < 10; i++) {
+			Entity entity = new Zombie();
+			entity.setLevel(1);
+			gameWorld.add(entity);
+			entity.getBody().setTransform(MathUtils.random(), MathUtils.random(), MathUtils.random(MathUtils.PI));
+		}
+
 	}
 
 	public void update(float delta) {
-		for (int i = 0; i < enemies.size; i++) {
-			enemies.get(i).update(delta);
-		}
+		gameWorld.update(delta);
 
-		world.step(delta, 8, 2);
-		getPlayer().update(delta);
-
-		Vector2 playerPos = getPlayer().getBody().getPosition();
+		Vector2 playerPos = player.getBody().getPosition();
 		camera.position.lerp(new Vector3(playerPos.x, playerPos.y, 0), 18f * delta);
 		camera.update();
-	}
-
-	public Player getPlayer() {
-		return player;
 	}
 
 	public void handleInput(float delta) {
@@ -92,5 +91,21 @@ public class WorldManager {
 		}
 
 		player.move(dx, dy, delta);
+	}
+
+	public Camera getCamera() {
+		return camera;
+	}
+
+	public GameWorld getGameWorld() {
+		return gameWorld;
+	}
+
+	public Stage getStage() {
+		return stage;
+	}
+
+	public FitViewport getViewport() {
+		return viewport;
 	}
 }

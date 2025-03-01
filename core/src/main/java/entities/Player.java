@@ -4,11 +4,10 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.World;
 
 import items.Inventory;
 
-public class Player {
+public class Player extends Entity {
 	private float walkAcceleration;
 	private float runAcceleration;
 	private float staminaChargeRate;
@@ -21,7 +20,6 @@ public class Player {
 
 	public float maxStamina;
 	public float stamina;
-	Body body;
 
 	static {
 		defaultBodyDef = new BodyDef();
@@ -40,11 +38,9 @@ public class Player {
 		defaultFixtureDef.density = 0.05f;
 	}
 
-	public Body getBody() {
-		return body;
-	}
-
 	public Player() {
+		super();
+		
 		inventory = new Inventory();
 
 		walkAcceleration = 1f;
@@ -63,6 +59,7 @@ public class Player {
 		running = false;
 	}
 
+	@Override
 	public void update(float delta) {
 		if (!running) {
 			stamina = Math.min(maxStamina, stamina + delta * staminaChargeRate);
@@ -74,16 +71,22 @@ public class Player {
 			return;
 
 		if (running && stamina >= 0) {
-			body.applyForceToCenter(dx * runAcceleration, dy * runAcceleration, false);
+			getBody().applyForceToCenter(dx * runAcceleration, dy * runAcceleration, false);
 			stamina -= delta;
 		} else {
 			running = false;
-			body.applyForceToCenter(dx * walkAcceleration, dy * walkAcceleration, false);
+			getBody().applyForceToCenter(dx * walkAcceleration, dy * walkAcceleration, false);
 		}
 	}
 
-	public void addToWorld(World world, float x, float y) {
-		body = world.createBody(defaultBodyDef);
+	@Override
+	public BodyDef getBodyDef() {
+		return defaultBodyDef;
+	}
+
+	@Override
+	public void configureBody(Body body) {
 		body.createFixture(defaultFixtureDef);
 	}
+
 }

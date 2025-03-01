@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 
+import world.WorldManager;
+
 public class GameRenderer {
 	WorldManager worldManager;
 	SpriteBatch spriteBatch;
@@ -17,11 +19,11 @@ public class GameRenderer {
 	}
 
 	public void render(float delta) {
-		spriteBatch.setProjectionMatrix(worldManager.camera.combined);
+		spriteBatch.setProjectionMatrix(worldManager.getCamera().combined);
 		spriteBatch.begin();
 		spriteBatch.draw(new Texture("test background map.png"), 0, 0, 10f, 10f);
 		spriteBatch.end();
 
-		debugRenderer.render(worldManager.world, worldManager.camera.combined);
+		debugRenderer.render(worldManager.getGameWorld().getWorld(), worldManager.getCamera().combined);
 	}
 }
