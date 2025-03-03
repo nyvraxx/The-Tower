@@ -7,15 +7,20 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import entities.Barrier;
 import entities.Entity;
+import entities.LevelTracker;
 import entities.Platform;
 import entities.Player;
 import entities.Stair;
+import entities.WorldObject;
 import entities.Zombie;
+import util.GeometryUtils;
 
 public class WorldManager {
 	Stage stage;
@@ -46,15 +51,15 @@ public class WorldManager {
 			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
 		}
 		{
-			Entity entity = new Barrier(5f, 0.1f);
-			entity.getLevelTracker().level = 1;
-			gameWorld.add(entity);
-			entity.getBody().setTransform(-3, -3f, 0);
+			Barrier barrier = new Barrier(5f, 0.1f);
+			barrier.getLevelTracker().level = 1;
+			gameWorld.add(barrier);
+			barrier.getBody().setTransform(-3, -3f, 0);
 		}
 		{
 			Platform platform = new Stair(0, 1f, 3f);
 			gameWorld.add(platform);
-			platform.getBody().setTransform(-1, 1, 0);
+			platform.getBody().setTransform(-1, 1, 2.3f);
 		}
 		{
 			Platform platform = new Stair(1, 1f, 3f);
@@ -64,6 +69,7 @@ public class WorldManager {
 	}
 
 	public void update(float delta) {
+		System.out.println(player.getLevelTracker());
 		gameWorld.update(delta);
 
 		Vector2 playerPos = player.getBody().getPosition();
@@ -122,5 +128,49 @@ public class WorldManager {
 
 	public Player getPlayer() {
 		return player;
+	}
+
+	public boolean isVisible(WorldObject worldObject) {
+		if (!worldObject.shouldCollide(player)) {
+			return false;
+		}
+
+		RayCastFirstObject rayCastFirstObject = new RayCastFirstObject(player.getLevelTracker());
+
+		GeometryUtils.getVertices(worldObject.getBody(), vec -> {
+			rayCastFirstObject.reset();
+			gameWorld.world.rayCast(rayCastFirstObject, player.getBody().getPosition(), vec);
+
+			if (rayCastFirstObject.first == worldObject) {
+				rayCastFirstObject.found = true;
+			}
+		});
+
+		return rayCastFirstObject.found;
+	}
+
+	private static class RayCastFirstObject implements RayCastCallback {
+		WorldObject first;
+		LevelTracker origin;
+		boolean found = false;
+
+		RayCastFirstObject(LevelTracker origin) {
+			this.origin = origin;
+		}
+
+		@Override
+		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
+			LevelTracker other = ((WorldObject) (fixture.getBody().getUserData())).getLevelTracker();
+			if (!origin.shouldCollide(other)) {
+				return -1;
+			}
+
+			first = (WorldObject) fixture.getBody().getUserData();
+			return 0;
+		}
+
+		void reset() {
+			first = null;
+		}
 	}
 }

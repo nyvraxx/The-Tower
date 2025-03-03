@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Transform;
 
@@ -11,6 +12,9 @@ public class Stair extends Platform {
 	private int level;
 	Fixture base;
 	Fixture top;
+	
+	Fixture leftWall;
+	Fixture rightWall;
 
 	protected final float hWidth, hHeight;
 
@@ -26,33 +30,34 @@ public class Stair extends Platform {
 
 		levelTracker.inTransition = true;
 	}
-
+	
 	@Override
 	public void beginContact(Fixture fixtureSelf, Fixture fixtureOther, WorldObject other) {
-		if (!(other instanceof Entity)) {
+		if (!(other instanceof Entity) || fixtureSelf == leftWall || fixtureSelf == rightWall) {
 			return;
 		}
 
 		Entity entity = (Entity) other;
-		fixtureOther.refilter();
 
 		entity.getLevelTracker().inTransition = true;
 		entity.getLevelTracker().level = level;
+		fixtureOther.refilter();
 	}
 
 	@Override
 	public void endContact(Fixture fixtureSelf, Fixture fixtureOther, WorldObject other) {
-		if (!(other instanceof Entity)) {
+		if (!(other instanceof Entity)|| fixtureSelf == leftWall || fixtureSelf == rightWall) {
 			return;
 		}
 		Entity entity = (Entity) other;
-		fixtureOther.refilter();
 
 		int dir = getDir(fixtureOther);
 		entity.getLevelTracker().inTransition = false;
 		if (dir == 1) {
 			entity.getLevelTracker().level++;
 		}
+		
+		fixtureOther.refilter();
 	}
 
 	// -1 for bottom, +1 for top
@@ -76,5 +81,18 @@ public class Stair extends Platform {
 	@Override
 	public void initializeBody(Body body) {
 		super.initializeBody(body);
+
+		FixtureDef leftWallDef = new FixtureDef();
+		PolygonShape leftWallShape = new PolygonShape();
+		leftWallShape.setAsBox(0.01f, hHeight, getBody().getPosition().set(hWidth, 0), 0);
+		leftWallDef.shape = leftWallShape;
+		leftWall = body.createFixture(leftWallDef);
+		
+		FixtureDef rightWallDef = new FixtureDef();
+		PolygonShape rightWallShape = new PolygonShape();
+		rightWallShape.setAsBox(0.01f, hHeight, getBody().getPosition().set(-hWidth, 0), 0);
+		rightWallDef.shape = rightWallShape;
+		rightWall = body.createFixture(rightWallDef);
+		
 	}
 }

@@ -58,6 +58,7 @@ public abstract class Entity implements WorldObject {
 
 	public abstract void updateSprite(Sprite sprite);
 	
+	@Override
 	public void render(Batch batch) {
 		updateSprite(sprite);
 		

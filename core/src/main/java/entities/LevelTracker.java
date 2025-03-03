@@ -20,4 +20,27 @@ public class LevelTracker {
 			return "level " + level;
 		}
 	}
+
+	public boolean shouldCollide(LevelTracker other) {
+		LevelTracker levA = this;
+		LevelTracker levB = other;
+
+		if (levA.inTransition && levB.inTransition) {
+			return levA.level == levB.level;
+		} else if (levA.inTransition ^ levB.inTransition) {
+			// make levA the one in transition
+			if (levB.inTransition) {
+				LevelTracker temp = levA;
+				levA = levB;
+				levB = temp;
+			}
+
+			int levA1 = levA.level;
+			int levA2 = levA.level + 1;
+
+			return levB.level == levA1 || levB.level == levA2;
+		} else {
+			return levA.level == levB.level;
+		}
+	}
 }

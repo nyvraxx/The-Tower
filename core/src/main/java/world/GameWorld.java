@@ -11,13 +11,10 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
-import entities.Entity;
-import entities.Platform;
 import entities.WorldObject;
 
 public class GameWorld {
-	Array<Platform> platforms;
-	Array<Entity> entities;
+	Array<WorldObject> worldObjects;
 
 	private ContactFilter contactFilter = new ContactFilter() {
 		@Override
@@ -69,8 +66,7 @@ public class GameWorld {
 	World world;
 
 	GameWorld() {
-		platforms = new Array<>();
-		entities = new Array<>();
+		worldObjects = new Array<>();
 
 		world = new World(Vector2.Zero, true);
 
@@ -79,37 +75,24 @@ public class GameWorld {
 	}
 
 	public void update(float delta) {
-		for (Entity entity : entities) {
-			entity.update(delta);
+		for (WorldObject worldObject : worldObjects) {
+			worldObject.update(delta);
 		}
 		world.step(delta, 8, 2);
 	}
 
-	public void add(Platform platform) {
-		platforms.add(platform);
+	public void add(WorldObject worldObject) {
+		worldObjects.add(worldObject);
 
-		Body body = world.createBody(platform.getBodyDef());
-		platform.initializeBody(body);
-	}
-
-	public void add(Entity entity) {
-		entities.add(entity);
-
-		Body body = world.createBody(entity.getBodyDef());
-		
-		entity.initializeBody(body);
+		Body body = world.createBody(worldObject.getBodyDef());
+		worldObject.initializeBody(body);
 	}
 
 	public World getWorld() {
 		return world;
 	}
 
-	public Array<Entity> getEntities() {
-		return entities;
+	public Array<WorldObject> getWorldObjects() {
+		return worldObjects;
 	}
-
-	public Array<Platform> getPlatforms() {
-		return platforms;
-	}
-
 }
