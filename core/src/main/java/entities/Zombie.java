@@ -1,9 +1,15 @@
 package entities;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Transform;
+
+import util.ImageUtils;
 
 public class Zombie extends Entity {
 	public Zombie() {
@@ -20,7 +26,6 @@ public class Zombie extends Entity {
 		body.createFixture(defaultFixtureDef);
 	}
 
-	
 	private static BodyDef defaultBodyDef;
 	private static FixtureDef defaultFixtureDef;
 
@@ -41,4 +46,16 @@ public class Zombie extends Entity {
 		defaultFixtureDef.density = 0.05f;
 	}
 
+	@Override
+	public void updateSprite(Sprite sprite) {
+		Transform transform = getBody().getTransform();
+
+		Vector2 pos = transform.getPosition();
+
+		sprite.setTexture(ImageUtils.OhNoTexture);
+		sprite.setOriginCenter();
+		sprite.setPosition(pos.x - 0.4f, pos.y - 0.4f);
+		sprite.setSize(0.8f, 0.8f);
+		sprite.setRotation(MathUtils.radiansToDegrees * transform.getRotation());
+	}
 }

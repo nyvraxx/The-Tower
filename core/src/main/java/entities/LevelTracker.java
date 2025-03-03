@@ -15,7 +15,7 @@ public class LevelTracker {
 	@Override
 	public String toString() {
 		if (inTransition) {
-			return "level " + " " + level + ", " + (level + 1);
+			return "level " + level + ", " + (level + 1);
 		} else {
 			return "level " + level;
 		}

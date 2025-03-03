@@ -25,7 +25,7 @@ public class WorldManager {
 	OrthographicCamera camera;
 	FitViewport viewport;
 
-	private float viewWidth = 10f, viewHeight = 10f;
+	private float viewWidth = 16f, viewHeight = 10f;
 
 	public WorldManager() {
 		gameWorld = new GameWorld();
@@ -45,12 +45,6 @@ public class WorldManager {
 			gameWorld.add(entity);
 			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
 		}
-//		for (int i = 0; i < 10; i++) {
-//			Entity entity = new Barrier(0.1f, 4f);
-//			entity.getLevelTracker().level = 0;
-//			gameWorld.add(entity);
-//			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
-//		}
 		{
 			Entity entity = new Barrier(5f, 0.1f);
 			entity.getLevelTracker().level = 1;
@@ -60,6 +54,7 @@ public class WorldManager {
 		{
 			Platform platform = new Stair(0, 1f, 3f);
 			gameWorld.add(platform);
+			platform.getBody().setTransform(-1, 1, 0);
 		}
 		{
 			Platform platform = new Stair(1, 1f, 3f);
@@ -123,5 +118,9 @@ public class WorldManager {
 
 	public FitViewport getViewport() {
 		return viewport;
+	}
+
+	public Player getPlayer() {
+		return player;
 	}
 }

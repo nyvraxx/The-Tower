@@ -96,7 +96,7 @@ public class GameWorld {
 		entities.add(entity);
 
 		Body body = world.createBody(entity.getBodyDef());
-
+		
 		entity.initializeBody(body);
 	}
 
@@ -106,6 +106,10 @@ public class GameWorld {
 
 	public Array<Entity> getEntities() {
 		return entities;
+	}
+
+	public Array<Platform> getPlatforms() {
+		return platforms;
 	}
 
 }

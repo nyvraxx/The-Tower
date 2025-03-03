@@ -1,19 +1,21 @@
 package entities;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.Transform;
 
-import items.Inventory;
+import util.ImageUtils;
 
 public class Player extends Entity {
 	private float walkAcceleration;
 	private float runAcceleration;
 	private float staminaChargeRate;
-
-	Inventory inventory;
-
+	
 	boolean running = false;
 	private static BodyDef defaultBodyDef;
 	private static FixtureDef defaultFixtureDef;
@@ -40,8 +42,6 @@ public class Player extends Entity {
 
 	public Player() {
 		super();
-
-		inventory = new Inventory();
 
 		walkAcceleration = 1f;
 		runAcceleration = 2.1f;
@@ -87,6 +87,19 @@ public class Player extends Entity {
 	@Override
 	public void configureBody(Body body) {
 		body.createFixture(defaultFixtureDef);
+	}
+
+	@Override
+	public void updateSprite(Sprite sprite) {
+		Transform transform = getBody().getTransform();
+
+		Vector2 pos = transform.getPosition();
+
+		sprite.setTexture(ImageUtils.OhNoTexture);
+		sprite.setOriginCenter();
+		sprite.setPosition(pos.x - 0.4f, pos.y - 0.4f);
+		sprite.setSize(0.8f, 0.8f);
+		sprite.setRotation(MathUtils.radiansToDegrees * transform.getRotation());
 	}
 
 }

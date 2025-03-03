@@ -8,16 +8,14 @@ import com.badlogic.gdx.graphics.GL20;
 import world.WorldManager;
 
 public class GameScreen implements Screen {
-	float worldWidth = 10f, worldHeight = 10f;
-
-	GameRenderer gameRenderer;
+	GameWorldRenderer gameWorldRenderer;
 	InputMultiplexer inputMultiplexer;
 	
 	WorldManager worldManager;
 
 	public GameScreen(WorldManager worldManager) {
-		gameRenderer = new GameRenderer(worldManager);
-		
+		gameWorldRenderer = new GameWorldRenderer(worldManager);
+				
 		inputMultiplexer = new InputMultiplexer();
 		inputMultiplexer.addProcessor(worldManager.getStage());
 		
@@ -40,7 +38,7 @@ public class GameScreen implements Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		
 		//TODO temp debug drawing methods	
-		gameRenderer.render(delta);
+		gameWorldRenderer.render(delta);
 	}
 
 	private void input(float delta) {

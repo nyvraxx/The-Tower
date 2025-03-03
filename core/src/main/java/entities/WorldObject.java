@@ -6,7 +6,7 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 
 public interface WorldObject {
 	BodyDef getBodyDef();
-
+	
 	LevelTracker getLevelTracker();
 
 	void initializeBody(Body body);

@@ -3,9 +3,7 @@ package entities;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Transform;
 
@@ -14,10 +12,10 @@ public class Stair extends Platform {
 	Fixture base;
 	Fixture top;
 
-	private final float hWidth, hHeight;
+	protected final float hWidth, hHeight;
 
 	public Stair(int level, float hWidth, float hHeight) {
-		super(level, new PolygonShape());
+		super(level, hWidth, hHeight);
 
 		this.hWidth = hWidth;
 		this.hHeight = hHeight;
@@ -36,6 +34,7 @@ public class Stair extends Platform {
 		}
 
 		Entity entity = (Entity) other;
+		fixtureOther.refilter();
 
 		entity.getLevelTracker().inTransition = true;
 		entity.getLevelTracker().level = level;
@@ -47,6 +46,7 @@ public class Stair extends Platform {
 			return;
 		}
 		Entity entity = (Entity) other;
+		fixtureOther.refilter();
 
 		int dir = getDir(fixtureOther);
 		entity.getLevelTracker().inTransition = false;
