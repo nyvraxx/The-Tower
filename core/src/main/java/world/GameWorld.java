@@ -12,8 +12,11 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 
 import entities.Entity;
+import entities.Platform;
+import entities.WorldObject;
 
 public class GameWorld {
+	Array<Platform> platforms;
 	Array<Entity> entities;
 
 	private ContactFilter contactFilter = new ContactFilter() {
@@ -22,13 +25,10 @@ public class GameWorld {
 			Object userDataA = fixtureA.getBody().getUserData();
 			Object userDataB = fixtureB.getBody().getUserData();
 
-			Entity entityA = (Entity) userDataA;
-			Entity entityB = (Entity) userDataB;
+			WorldObject worldObjectA = (WorldObject) userDataA;
+			WorldObject worldObjectB = (WorldObject) userDataB;
 
-			if (entityA.getLevel() == entityB.getLevel())
-				return true;
-
-			return false;
+			return worldObjectA.shouldCollide(worldObjectB);
 		}
 	};
 	private ContactListener contactListener = new ContactListener() {
@@ -38,31 +38,38 @@ public class GameWorld {
 			Object userDataA = contact.getFixtureA().getBody().getUserData();
 			Object userDataB = contact.getFixtureB().getBody().getUserData();
 
-			Entity entityA = (Entity) contact.getFixtureA().getBody().getUserData();
-			Entity entityB = (Entity) contact.getFixtureB().getBody().getUserData();
+			WorldObject worldObjectA = (WorldObject) userDataA;
+			WorldObject worldObjectB = (WorldObject) userDataB;
 
-			entityA.beginContact(entityB);
-			entityB.beginContact(entityA);
+			worldObjectA.beginContact(contact.getFixtureA(), contact.getFixtureB(), worldObjectB);
+			worldObjectB.beginContact(contact.getFixtureB(), contact.getFixtureA(), worldObjectA);
 		}
 
 		@Override
 		public void endContact(Contact contact) {
+			Object userDataA = contact.getFixtureA().getBody().getUserData();
+			Object userDataB = contact.getFixtureB().getBody().getUserData();
+
+			WorldObject worldObjectA = (WorldObject) userDataA;
+			WorldObject worldObjectB = (WorldObject) userDataB;
+
+			worldObjectA.endContact(contact.getFixtureA(), contact.getFixtureB(), worldObjectB);
+			worldObjectB.endContact(contact.getFixtureB(), contact.getFixtureA(), worldObjectA);
 		}
 
 		@Override
 		public void preSolve(Contact contact, Manifold oldManifold) {
-
 		}
 
 		@Override
 		public void postSolve(Contact contact, ContactImpulse impulse) {
-
 		}
 	};
 
 	World world;
 
 	GameWorld() {
+		platforms = new Array<>();
 		entities = new Array<>();
 
 		world = new World(Vector2.Zero, true);
@@ -76,6 +83,13 @@ public class GameWorld {
 			entity.update(delta);
 		}
 		world.step(delta, 8, 2);
+	}
+
+	public void add(Platform platform) {
+		platforms.add(platform);
+
+		Body body = world.createBody(platform.getBodyDef());
+		platform.initializeBody(body);
 	}
 
 	public void add(Entity entity) {

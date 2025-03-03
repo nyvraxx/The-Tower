@@ -80,11 +80,6 @@ public class Player extends Entity {
 	}
 
 	@Override
-	public void setLevel(int level) {
-		super.setLevel(level);
-	}
-
-	@Override
 	public BodyDef getBodyDef() {
 		return defaultBodyDef;
 	}

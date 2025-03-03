@@ -1,4 +1,4 @@
-package com.nyvraxx.apcsagameproject;
+package main;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.physics.box2d.Box2D;

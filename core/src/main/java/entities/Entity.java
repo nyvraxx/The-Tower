@@ -4,36 +4,29 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 
-public abstract class Entity {
-
-	int level = Integer.MIN_VALUE;
+public abstract class Entity implements WorldObject {
+	LevelTracker levelTracker;
 	private Body body;
 
 	public Entity() {
+		levelTracker = new LevelTracker();
 	}
 
+	@Override
 	public abstract BodyDef getBodyDef();
 
-	public abstract void configureBody(Body body);
+	protected abstract void configureBody(Body body);
 
 	public Body getBody() {
 		return body;
 	}
 
-	public int getLevel() {
-		return level;
+	@Override
+	public LevelTracker getLevelTracker() {
+		return levelTracker;
 	}
 
-	public void setLevel(int level) {		
-		this.level = level;
-		
-		if (body != null) {
-			for (Fixture fixture : body.getFixtureList()) {
-				fixture.refilter();
-			}
-		}
-	}
-
+	@Override
 	public void initializeBody(Body body) {
 		this.body = body;
 		this.body.setUserData(this);
@@ -47,4 +40,10 @@ public abstract class Entity {
 	public void beginContact(Entity other) {
 	}
 
+	@Override
+	public void beginContact(Fixture fixtureSelf, Fixture fixtureOther, WorldObject other) {
+	}
+	@Override
+	public void endContact(Fixture fixtureSelf, Fixture fixtureOther, WorldObject other) {
+	}
 }

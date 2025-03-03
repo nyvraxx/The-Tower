@@ -1,4 +1,4 @@
-package com.nyvraxx.apcsagameproject;
+package main;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -32,7 +32,7 @@ public class GameRenderer {
 		shapeRenderer.begin();
 		
 		for (Entity entity : worldManager.getGameWorld().getEntities()) {
-			shapeRenderer.setColor(new Color(entity.getLevel() * 0.2f + 0.5f, 0f, 0f, 1f));
+			shapeRenderer.setColor(new Color(entity.getLevelTracker().level * 0.2f + 0.5f, 0f, 0f, 1f));
 			shapeRenderer.circle(entity.getBody().getTransform().getPosition().x, entity.getBody().getTransform().getPosition().y, 0.1f, 10);
 		}
 		shapeRenderer.end();

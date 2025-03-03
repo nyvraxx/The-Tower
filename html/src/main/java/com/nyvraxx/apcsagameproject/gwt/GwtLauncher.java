@@ -3,7 +3,8 @@ package com.nyvraxx.apcsagameproject.gwt;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
-import com.nyvraxx.apcsagameproject.Main;
+
+import main.Main;
 
 /** Launches the GWT application. */
 public class GwtLauncher extends GwtApplication {

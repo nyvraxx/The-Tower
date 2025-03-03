@@ -1,4 +1,4 @@
-package com.nyvraxx.apcsagameproject;
+package main;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
