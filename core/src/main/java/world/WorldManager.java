@@ -7,10 +7,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import entities.Barrier;
 import entities.Entity;
 import entities.Player;
 import entities.Zombie;
@@ -33,7 +33,7 @@ public class WorldManager {
 		stage = new Stage(getViewport());
 
 		player = new Player();
-		player.setLevel(2);
+		player.setLevel(0);
 		gameWorld.add(player);
 
 		// TODO debug code
@@ -43,26 +43,11 @@ public class WorldManager {
 			gameWorld.add(entity);
 			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
 		}
-		{
-			PolygonShape shape = new PolygonShape();
-			shape.setAsBox(1f, 1f);
-			Platform platform = new Platform(2, shape);
-			gameWorld.add(platform);
-		}
-		{
-			PolygonShape shape = new PolygonShape();
-			shape.setAsBox(2f, 1f);
-			Platform platform = new Platform(1, shape);
-			gameWorld.add(platform);
-			platform.getBody().setTransform(3, 0, 0);
-		}
-		{
-			PolygonShape shape = new PolygonShape();
-			shape.setAsBox(2f, 1f);
-			Platform platformtest = new Platform(1, shape);
-			gameWorld.add(platformtest);
-			platformtest.getBody().setTransform(3, 2, 0);
-			
+		for (int i = 0; i < 10; i++) {
+			Entity entity = new Barrier(0.1f, 4f);
+			entity.setLevel(0);
+			gameWorld.add(entity);
+			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
 		}
 	}
 
