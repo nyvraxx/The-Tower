@@ -10,6 +10,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import entities.Barrier;
@@ -25,6 +27,9 @@ import util.GeometryUtils;
 public class WorldManager {
 	Stage stage;
 
+	ObjectSet<Entity> visibleEntities;
+	Array<Vector2> visionPolygon;
+
 	Player player;
 	GameWorld gameWorld;
 	OrthographicCamera camera;
@@ -33,6 +38,9 @@ public class WorldManager {
 	private float viewWidth = 16f, viewHeight = 10f;
 
 	public WorldManager() {
+		visibleEntities = new ObjectSet<>();
+		visionPolygon = new Array<>();
+
 		gameWorld = new GameWorld();
 		camera = new OrthographicCamera();
 		camera.position.set(0, 0, 0);
@@ -69,7 +77,7 @@ public class WorldManager {
 	}
 
 	public void update(float delta) {
-		System.out.println(player.getLevelTracker());
+		updateRaycasts();
 		gameWorld.update(delta);
 
 		Vector2 playerPos = player.getBody().getPosition();
@@ -135,42 +143,79 @@ public class WorldManager {
 			return false;
 		}
 
-		RayCastFirstObject rayCastFirstObject = new RayCastFirstObject(player.getLevelTracker());
+		if (worldObject instanceof Entity) {
+			return visibleEntities.contains((Entity) worldObject);
+		} else {
+			return true;
+		}
+	}
 
-		GeometryUtils.getVertices(worldObject.getBody(), vec -> {
-			rayCastFirstObject.reset();
-			gameWorld.world.rayCast(rayCastFirstObject, player.getBody().getPosition(), vec);
+	private void updateRaycasts() {
+		visionPolygon.clear();
+		visibleEntities.clear();
 
-			if (rayCastFirstObject.first == worldObject) {
-				rayCastFirstObject.found = true;
+		for (WorldObject worldObject : gameWorld.worldObjects) {
+			if (worldObject == player || !worldObject.shouldCollide(player)) {
+				continue;
 			}
-		});
 
-		return rayCastFirstObject.found;
+			RayCastFirstObject rayCastFirstObject = new RayCastFirstObject(player);
+
+			GeometryUtils.getVertices(worldObject.getBody(), vec -> {
+				gameWorld.world.rayCast(rayCastFirstObject, player.getBody().getPosition(), vec);
+
+				if (rayCastFirstObject.first == worldObject && worldObject instanceof Entity) {
+					visibleEntities.add((Entity) worldObject);
+				}
+
+				if (rayCastFirstObject.found)
+					visionPolygon.add(new Vector2(rayCastFirstObject.x, rayCastFirstObject.y));
+			});
+		}
+
+		Vector2 playerPos = player.getBody().getPosition();
+
+		visionPolygon.sort((a, b) -> {
+			return Float.compare(a.cpy().sub(playerPos).angleRad(), b.cpy().sub(playerPos).angleRad());
+		});
 	}
 
 	private static class RayCastFirstObject implements RayCastCallback {
-		WorldObject first;
-		LevelTracker origin;
+		float x = 2, y;
 		boolean found = false;
+		WorldObject first;
+		WorldObject origin;
 
-		RayCastFirstObject(LevelTracker origin) {
+		RayCastFirstObject(WorldObject origin) {
 			this.origin = origin;
 		}
 
 		@Override
 		public float reportRayFixture(Fixture fixture, Vector2 point, Vector2 normal, float fraction) {
-			LevelTracker other = ((WorldObject) (fixture.getBody().getUserData())).getLevelTracker();
-			if (!origin.shouldCollide(other)) {
+			WorldObject other = (WorldObject) fixture.getBody().getUserData();
+			if (other instanceof Platform) {
 				return -1;
 			}
+//			if (!origin.shouldCollide(other)) {
+//				return -1;
+//			}
+
+			found = true;
 
 			first = (WorldObject) fixture.getBody().getUserData();
+			x = point.x;
+			y = point.y;
 			return 0;
 		}
+	}
 
-		void reset() {
-			first = null;
+	public float[] getVisionPolygon() {
+		float[] points = new float[visionPolygon.size * 2];
+
+		for (int i = 0; i < visionPolygon.size; i++) {
+			points[2 * i] = visionPolygon.get(i).x;
+			points[2 * i + 1] = visionPolygon.get(i).y;
 		}
+		return points;
 	}
 }

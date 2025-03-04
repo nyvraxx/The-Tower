@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import entities.WorldObject;
 
 public class GameWorld {
+	
 	Array<WorldObject> worldObjects;
 
 	private ContactFilter contactFilter = new ContactFilter() {
@@ -67,7 +68,7 @@ public class GameWorld {
 
 	GameWorld() {
 		worldObjects = new Array<>();
-
+		
 		world = new World(Vector2.Zero, true);
 
 		world.setContactListener(contactListener);
