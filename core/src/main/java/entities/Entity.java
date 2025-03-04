@@ -15,7 +15,7 @@ public abstract class Entity implements WorldObject {
 
 	public Entity() {
 		levelTracker = new LevelTracker();
-		
+
 		sprite.setSize(1f, 1f);
 	}
 
@@ -57,11 +57,21 @@ public abstract class Entity implements WorldObject {
 	}
 
 	public abstract void updateSprite(Sprite sprite);
-	
+
+	@Override
+	public boolean alwaysVisible() {
+		return false;
+	}
+
+	@Override
+	public boolean blocksVision() {
+		return false;
+	}
+
 	@Override
 	public void render(Batch batch) {
 		updateSprite(sprite);
-		
+
 		sprite.draw(batch);
 	}
 }

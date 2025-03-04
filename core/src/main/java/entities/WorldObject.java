@@ -26,4 +26,12 @@ public interface WorldObject {
 
 	default void update(float delta) {
 	}
+
+	default boolean alwaysVisible() {
+		return true;
+	}
+
+	default boolean blocksVision() {
+		return true;
+	}
 }

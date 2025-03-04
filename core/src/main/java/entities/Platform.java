@@ -15,17 +15,22 @@ import com.badlogic.gdx.physics.box2d.Transform;
 
 import util.ImageUtils;
 
-public class Platform implements WorldObject {	
+public class Platform implements WorldObject {
 	LevelTracker levelTracker;
 	private Sprite sprite = new Sprite();
 	private static BodyDef defaultBodyDef;
-	
+
 	private final float hWidth, hHeight;
-	
+
 	static {
 		defaultBodyDef = new BodyDef();
 
 		defaultBodyDef.type = BodyType.StaticBody;
+	}
+
+	@Override
+	public boolean blocksVision() {
+		return false;
 	}
 
 	public Body getBody() {
@@ -34,12 +39,12 @@ public class Platform implements WorldObject {
 
 	protected Shape shape;
 	private Body body;
-	
+
 	@Override
 	public void initializeBody(Body body) {
 		this.body = body;
 		this.body.setUserData(this);
-		
+
 		body.createFixture(createFixture());
 	}
 
@@ -58,13 +63,13 @@ public class Platform implements WorldObject {
 
 	public Platform(int level, float hWidth, float hHeight) {
 		levelTracker = new LevelTracker(level);
-		
+
 		this.hWidth = hWidth;
 		this.hHeight = hHeight;
-		
+
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox(hWidth, hHeight);
-		
+
 		this.shape = shape;
 	}
 
@@ -91,7 +96,7 @@ public class Platform implements WorldObject {
 		sprite.setPosition(pos.x - hWidth, pos.y - hHeight);
 		sprite.setSize(2 * hWidth, 2 * hHeight);
 		sprite.setRotation(MathUtils.radiansToDegrees * transform.getRotation());
-		
+
 		sprite.draw(batch);
 	}
 

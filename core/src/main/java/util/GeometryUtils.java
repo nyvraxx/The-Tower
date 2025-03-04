@@ -2,6 +2,7 @@ package util;
 
 import java.util.function.Consumer;
 
+import com.badlogic.gdx.math.EarClippingTriangulator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -9,8 +10,11 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
+import com.badlogic.gdx.utils.ShortArray;
 
 public class GeometryUtils {
+	private static EarClippingTriangulator earClippingTriangulator = new EarClippingTriangulator();
+
 	private static final int CircleApproxEdges = 40;
 	private static final float CircleApproxEdgesInterval = MathUtils.PI2 / CircleApproxEdges;
 
@@ -33,6 +37,10 @@ public class GeometryUtils {
 				consumer.accept(local.rotateRad(angle).add(x, y));
 			});
 		}
+	}
+
+	public static ShortArray triangulatePolygon(float[] points) {
+		return earClippingTriangulator.computeTriangles(points);
 	}
 
 	private static void getVertices(Shape shape, Vector2 vec, Consumer<Vector2> consumer) {
