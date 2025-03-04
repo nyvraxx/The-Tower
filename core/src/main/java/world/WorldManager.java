@@ -7,14 +7,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import entities.Barrier;
+import entities.Couch;
 import entities.Entity;
 import entities.Platform;
 import entities.Player;
@@ -56,8 +53,14 @@ public class WorldManager {
 		raycaster = new Raycaster(gameWorld.world);
 
 		// TODO debug code
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 10; i++) {
 			Entity entity = new Zombie();
+			entity.getLevelTracker().level = 0;
+			gameWorld.add(entity);
+			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
+		}
+		for (int i = 0; i < 3; i++) {
+			Entity entity = new Couch(0.34f, 0.8f);
 			entity.getLevelTracker().level = 0;
 			gameWorld.add(entity);
 			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
@@ -76,12 +79,26 @@ public class WorldManager {
 
 		}
 		{
-			Platform platform = new Stair(0, 1f, 3f);
+			Platform platform = new Stair(0, 1f, 0.5f);
 			gameWorld.add(platform);
 			platform.getBody().setTransform(-1, 1, 2.3f);
 		}
 		{
-			Platform platform = new Stair(1, 1f, 3f);
+			Barrier barrier = new Barrier(1f, .01f);
+			barrier.getLevelTracker().level = 2;
+			gameWorld.add(barrier);
+			barrier.getBody().setTransform(3f, 0.0f, 0f);
+
+		}
+		{
+			Barrier barrier = new Barrier(1f, .01f);
+			barrier.getLevelTracker().level = 1;
+			gameWorld.add(barrier);
+			barrier.getBody().setTransform(3f, 2f, 0f);
+
+		}
+		{
+			Platform platform = new Stair(1, 1f, 0.5f);
 			gameWorld.add(platform);
 			platform.getBody().setTransform(3, 1, 0);
 		}
@@ -175,10 +192,10 @@ public class WorldManager {
 		viewingFrustrum.updateVisible(gameWorld.world);
 
 		for (WorldObject visible : viewingFrustrum.getVisible()) {
-			if(!visible.blocksVision()) {
+			if (!visible.blocksVision()) {
 				continue;
 			}
-			
+
 			GeometryUtils.getVertices(visible.getBody(), vec -> {
 				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x, vec.y, r));
 				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x + epsilon, vec.y, r));
