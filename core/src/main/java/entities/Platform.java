@@ -21,7 +21,9 @@ public class Platform implements WorldObject {
 	private static BodyDef defaultBodyDef;
 
 	private final float hWidth, hHeight;
-
+	
+	protected Fixture sensor;
+	
 	static {
 		defaultBodyDef = new BodyDef();
 
@@ -45,7 +47,7 @@ public class Platform implements WorldObject {
 		this.body = body;
 		this.body.setUserData(this);
 
-		body.createFixture(createFixture());
+		sensor = body.createFixture(createFixture());
 	}
 
 	private FixtureDef createFixture() {

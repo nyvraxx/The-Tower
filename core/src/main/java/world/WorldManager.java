@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import entities.Barrier;
 import entities.Couch;
 import entities.Entity;
-import entities.Platform;
+import entities.LevelTracker;
 import entities.Player;
 import entities.Stair;
 import entities.WorldObject;
@@ -32,7 +32,7 @@ public class WorldManager {
 	GameWorld gameWorld;
 	OrthographicCamera camera;
 	FitViewport viewport;
-
+private Couch couch;
 	private float viewWidth = 16f * 0.45f, viewHeight = 10f * 0.45f;
 
 	public WorldManager() {
@@ -59,8 +59,15 @@ public class WorldManager {
 			gameWorld.add(entity);
 			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
 		}
-		for (int i = 0; i < 3; i++) {
-			Entity entity = new Couch(0.34f, 0.8f);
+		for (int i = 0; i < 10; i++) {
+			Entity entity = new Zombie();
+			entity.getLevelTracker().level = 1;
+			gameWorld.add(entity);
+			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
+		}
+		for (int i = 0; i < 1; i++) {
+			Entity entity = new Couch(0.3f, 0.6f);
+			couch= (Couch) entity;
 			entity.getLevelTracker().level = 0;
 			gameWorld.add(entity);
 			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
@@ -79,32 +86,35 @@ public class WorldManager {
 
 		}
 		{
-			Platform platform = new Stair(0, 1f, 0.5f);
+			Stair platform = new Stair(0, 0.8f, 1f);
 			gameWorld.add(platform);
-			platform.getBody().setTransform(-1, 1, 2.3f);
+			platform.getBody().setTransform(-1, 1, 0f);
+			platform.generateBarriers(gameWorld, 0.01f);
 		}
 		{
 			Barrier barrier = new Barrier(1f, .01f);
 			barrier.getLevelTracker().level = 2;
 			gameWorld.add(barrier);
-			barrier.getBody().setTransform(3f, 0.0f, 0f);
+			barrier.getBody().setTransform(3f, -0.5f, 0f);
 
 		}
 		{
 			Barrier barrier = new Barrier(1f, .01f);
 			barrier.getLevelTracker().level = 1;
 			gameWorld.add(barrier);
-			barrier.getBody().setTransform(3f, 2f, 0f);
+			barrier.getBody().setTransform(3f, 2.5f, 0f);
 
 		}
 		{
-			Platform platform = new Stair(1, 1f, 0.5f);
+			Stair platform = new Stair(1, 0.5f, 1f);
 			gameWorld.add(platform);
+//			platform.generateBarriers(gameWorld, 0.1f);
 			platform.getBody().setTransform(3, 1, 0);
 		}
 	}
 
 	public void update(float delta) {
+		System.out.println(couch.getLevelTracker());
 		gameWorld.update(delta);
 
 		Vector2 playerPos = player.getBody().getPosition();
@@ -169,7 +179,7 @@ public class WorldManager {
 	}
 
 	public boolean isVisible(WorldObject worldObject) {
-		if (!worldObject.shouldCollide(player)) {
+		if (!player.getLevelTracker().isVisible(worldObject.getLevelTracker())) {
 			return false;
 		}
 
@@ -184,24 +194,38 @@ public class WorldManager {
 		visionPolygon.clear();
 
 		Vector2 playerPos = player.getBody().getPosition();
+		LevelTracker rayLevelTracker = player.getLevelTracker();
+
 		float x = playerPos.x;
 		float y = playerPos.y;
 		float r = 10f;
 
-		final float epsilon = 0.001f;
+		final float epsilonOffset = 0.001f;
 		viewingFrustrum.updateVisible(gameWorld.world);
 
 		for (WorldObject visible : viewingFrustrum.getVisible()) {
 			if (!visible.blocksVision()) {
 				continue;
 			}
+			if (!player.getLevelTracker().isVisible(visible.getLevelTracker())) {
+				continue;
+			}
 
 			GeometryUtils.getVertices(visible.getBody(), vec -> {
-				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x, vec.y, r));
-				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x + epsilon, vec.y, r));
-				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x - epsilon, vec.y, r));
-				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x, vec.y + epsilon, r));
-				visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, vec.x, vec.y - epsilon, r));
+				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, vec.x, vec.y, r));
+
+				Vector2 diff = new Vector2(vec.x - x, vec.y - y);
+
+				diff.rotateRad(epsilonOffset);
+				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+				diff.rotateRad(epsilonOffset);
+				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+
+				diff.set(vec.x - x, vec.y - y);
+				diff.rotateRad(-epsilonOffset);
+				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+				diff.rotateRad(-epsilonOffset);
+				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
 			});
 		}
 
@@ -211,12 +235,16 @@ public class WorldManager {
 			float normX = MathUtils.cos(angle);
 			float normY = MathUtils.sin(angle);
 
-			visionPolygon.add(raycaster.shootRay(player.getLevelTracker(), x, y, x + normX, y + normY, r).cpy());
+			visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + normX, y + normY, r).cpy());
 		}
 
 		visionPolygon.sort((a, b) -> {
-			float angleA = MathUtils.atan2(a.x - playerPos.x, a.y - playerPos.y);
-			float angleB = MathUtils.atan2(b.x - playerPos.x, b.y - playerPos.y);
+			float dxA = a.x - playerPos.x;
+			float dyA = a.y - playerPos.y;
+			float dxB = b.x - playerPos.x;
+			float dyB = b.y - playerPos.y;
+			float angleA = MathUtils.atan2(dxA, dyA);
+			float angleB = MathUtils.atan2(dxB, dyB);
 
 			return Float.compare(angleA, angleB);
 		});

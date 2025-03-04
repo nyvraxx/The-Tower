@@ -63,7 +63,7 @@ public class Raycaster {
 			if (!other.blocksVision()) {
 				return -1;
 			}
-			if (!origin.shouldCollide(((WorldObject) other.getBody().getUserData()).getLevelTracker())) {
+			if (!origin.isVisible(((WorldObject) other.getBody().getUserData()).getLevelTracker())) {
 				return -1;
 			}
 

@@ -5,8 +5,6 @@ import java.util.Comparator;
 
 import com.badlogic.gdx.math.Vector2;
 
-import entities.WorldObject;
-
 /**
  * @apiNote this class is not thread safe
  */

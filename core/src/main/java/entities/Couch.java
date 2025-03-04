@@ -50,7 +50,7 @@ public class Couch extends Entity {
 		defaultFixtureDef.restitution = 0f;
 		defaultFixtureDef.shape = new PolygonShape();
 		((PolygonShape) defaultFixtureDef.shape).setAsBox(hWidth, hHeight);
-		defaultFixtureDef.density = 0.5f;
+		defaultFixtureDef.density = 0.025f;
 		return defaultFixtureDef;
 	}
 
@@ -62,8 +62,8 @@ public class Couch extends Entity {
 
 		sprite.setTexture(ImageUtils.OhNoTexture);
 		sprite.setOriginCenter();
-		sprite.setPosition(pos.x - 0.2f, pos.y - 0.2f);
-		sprite.setSize(0.4f, 0.4f);
+		sprite.setPosition(pos.x - hWidth, pos.y - hHeight);
+		sprite.setSize(hWidth*2, hHeight*2);
 		sprite.setRotation(MathUtils.radiansToDegrees * transform.getRotation());
 	}
 }
