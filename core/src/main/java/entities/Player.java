@@ -15,10 +15,9 @@ public class Player extends Entity {
 	private float walkAcceleration;
 	private float runAcceleration;
 	private float staminaChargeRate;
-	
+
 	boolean running = false;
 	private static BodyDef defaultBodyDef;
-	private static FixtureDef defaultFixtureDef;
 
 	public float maxStamina;
 	public float stamina;
@@ -32,12 +31,18 @@ public class Player extends Entity {
 		defaultBodyDef.fixedRotation = true;
 		defaultBodyDef.linearDamping = 8f;
 
+	}
+
+	private FixtureDef createFixtureDef() {
+		FixtureDef defaultFixtureDef;
+
 		defaultFixtureDef = new FixtureDef();
 		defaultFixtureDef.friction = 0.1f;
 		defaultFixtureDef.restitution = 0f;
 		defaultFixtureDef.shape = new CircleShape();
-		defaultFixtureDef.shape.setRadius(0.4f);
-		defaultFixtureDef.density = 0.05f;
+		defaultFixtureDef.shape.setRadius(0.2f);
+		defaultFixtureDef.density = 0.42f;
+		return defaultFixtureDef;
 	}
 
 	public Player() {
@@ -86,7 +91,7 @@ public class Player extends Entity {
 
 	@Override
 	public void configureBody(Body body) {
-		body.createFixture(defaultFixtureDef);
+		body.createFixture(createFixtureDef());
 	}
 
 	@Override
@@ -97,8 +102,8 @@ public class Player extends Entity {
 
 		sprite.setTexture(ImageUtils.OhNoTexture);
 		sprite.setOriginCenter();
-		sprite.setPosition(pos.x - 0.4f, pos.y - 0.4f);
-		sprite.setSize(0.8f, 0.8f);
+		sprite.setPosition(pos.x - 0.2f, pos.y - 0.2f);
+		sprite.setSize(0.4f, 0.4f);
 		sprite.setRotation(MathUtils.radiansToDegrees * transform.getRotation());
 	}
 

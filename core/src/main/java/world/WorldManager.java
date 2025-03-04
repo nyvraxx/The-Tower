@@ -34,7 +34,7 @@ public class WorldManager {
 	OrthographicCamera camera;
 	FitViewport viewport;
 
-	private float viewWidth = 16f, viewHeight = 10f;
+	private float viewWidth = 16f * 0.4f, viewHeight = 10f * 0.4f;
 
 	public WorldManager() {
 		visibleEntities = new ObjectSet<>();
@@ -51,17 +51,23 @@ public class WorldManager {
 		gameWorld.add(player);
 
 		// TODO debug code
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 200; i++) {
 			Entity entity = new Zombie();
 			entity.getLevelTracker().level = 0;
 			gameWorld.add(entity);
-			entity.getBody().setTransform(MathUtils.random(5), MathUtils.random(5), MathUtils.random(MathUtils.PI));
+			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
 		}
 		{
 			Barrier barrier = new Barrier(5f, 0.1f);
 			barrier.getLevelTracker().level = 1;
 			gameWorld.add(barrier);
 			barrier.getBody().setTransform(-3, -3f, 0);
+		}
+		{
+			Barrier barrier = new Barrier(0.1f, 4f);
+			barrier.getLevelTracker().level = 0;
+			gameWorld.add(barrier);
+			barrier.getBody().setTransform(3, 3f, 0);
 		}
 		{
 			Platform platform = new Stair(0, 1f, 3f);
@@ -193,6 +199,7 @@ public class WorldManager {
 				raycast(rayCastFirstObject, x, y, vec.x - epsilon, vec.y, r);
 				raycast(rayCastFirstObject, x, y, vec.x, vec.y + epsilon, r);
 				raycast(rayCastFirstObject, x, y, vec.x, vec.y - epsilon, r);
+
 			});
 		}
 		int numFree = 50;

@@ -22,17 +22,17 @@ public class GameWorldRenderer {
 		this.worldManager = worldManager;
 
 		debugRenderer = new Box2DDebugRenderer();
-		shapeRenderer = new ShapeRenderer();
+		shapeRenderer = new ShapeRenderer(1000000);
 	}
 
 	public void render(float delta) {
 		Player player = worldManager.getPlayer();
-		
+
 		shapeRenderer.setColor(1f, 0f, 0, 1f);
 		shapeRenderer.setAutoShapeType(true);
 		shapeRenderer.setProjectionMatrix(worldManager.getCamera().combined);
 		shapeRenderer.begin(ShapeType.Filled);
-		
+
 		float[] points = worldManager.getVisionPolygon();
 		for (int i = 0; i < points.length; i += 2) {
 			shapeRenderer.circle(points[i], points[i + 1], 0.05f, 10);

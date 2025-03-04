@@ -11,7 +11,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 
 public class GeometryUtils {
-	private static final int CircleApproxEdges = 30;
+	private static final int CircleApproxEdges = 40;
 	private static final float CircleApproxEdgesInterval = MathUtils.PI2 / CircleApproxEdges;
 
 	/**
