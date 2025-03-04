@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import entities.Barrier;
 import entities.Entity;
-import entities.LevelTracker;
 import entities.Platform;
 import entities.Player;
 import entities.Stair;
@@ -77,8 +76,8 @@ public class WorldManager {
 	}
 
 	public void update(float delta) {
-		updateRaycasts();
 		gameWorld.update(delta);
+		updateRaycasts();
 
 		Vector2 playerPos = player.getBody().getPosition();
 		camera.position.lerp(new Vector3(playerPos.x, playerPos.y, 0), 18f * delta);
@@ -150,9 +149,35 @@ public class WorldManager {
 		}
 	}
 
+	private void raycast(RayCastFirstObject rayCastFirstObject, float x, float y, float toX, float toY, float r) {
+		float normX = toX - x;
+		float normY = toY - y;
+
+		float invMag = 1.0f / (float) Math.sqrt(normX * normX + normY * normY);
+		normX *= invMag;
+		normY *= invMag;
+
+		rayCastFirstObject.found = false;
+		gameWorld.world.rayCast(rayCastFirstObject, x, y, x + r * normX, y + r * normY);
+
+		if (rayCastFirstObject.found) {
+			if (rayCastFirstObject.first instanceof Entity) {
+				visibleEntities.add((Entity) rayCastFirstObject.first);
+			}
+			visionPolygon.add(new Vector2(rayCastFirstObject.x, rayCastFirstObject.y));
+		} else {
+			visionPolygon.add(new Vector2(x + r * normX, y + r * normY));
+		}
+	}
+
 	private void updateRaycasts() {
 		visionPolygon.clear();
 		visibleEntities.clear();
+
+		Vector2 playerPos = player.getBody().getPosition();
+		float x = playerPos.x;
+		float y = playerPos.y;
+		float r = 10f;
 
 		for (WorldObject worldObject : gameWorld.worldObjects) {
 			if (worldObject == player || !worldObject.shouldCollide(player)) {
@@ -161,19 +186,25 @@ public class WorldManager {
 
 			RayCastFirstObject rayCastFirstObject = new RayCastFirstObject(player);
 
+			final float epsilon = 0.01f;
 			GeometryUtils.getVertices(worldObject.getBody(), vec -> {
-				gameWorld.world.rayCast(rayCastFirstObject, player.getBody().getPosition(), vec);
-
-				if (rayCastFirstObject.first == worldObject && worldObject instanceof Entity) {
-					visibleEntities.add((Entity) worldObject);
-				}
-
-				if (rayCastFirstObject.found)
-					visionPolygon.add(new Vector2(rayCastFirstObject.x, rayCastFirstObject.y));
+				raycast(rayCastFirstObject, x, y, vec.x, vec.y, r);
+				raycast(rayCastFirstObject, x, y, vec.x + epsilon, vec.y, r);
+				raycast(rayCastFirstObject, x, y, vec.x - epsilon, vec.y, r);
+				raycast(rayCastFirstObject, x, y, vec.x, vec.y + epsilon, r);
+				raycast(rayCastFirstObject, x, y, vec.x, vec.y - epsilon, r);
 			});
 		}
+		int numFree = 50;
+		for (int i = 0; i < numFree; i++) {
+			RayCastFirstObject rayCastFirstObject = new RayCastFirstObject(player);
 
-		Vector2 playerPos = player.getBody().getPosition();
+			float angle = i * MathUtils.PI2 / numFree;
+			float normX = MathUtils.cos(angle);
+			float normY = MathUtils.sin(angle);
+
+			raycast(rayCastFirstObject, x, y, x + normX, y + normY, r);
+		}
 
 		visionPolygon.sort((a, b) -> {
 			return Float.compare(a.cpy().sub(playerPos).angleRad(), b.cpy().sub(playerPos).angleRad());
@@ -181,7 +212,7 @@ public class WorldManager {
 	}
 
 	private static class RayCastFirstObject implements RayCastCallback {
-		float x = 2, y;
+		float x, y;
 		boolean found = false;
 		WorldObject first;
 		WorldObject origin;
@@ -196,16 +227,16 @@ public class WorldManager {
 			if (other instanceof Platform) {
 				return -1;
 			}
-//			if (!origin.shouldCollide(other)) {
-//				return -1;
-//			}
+			if (!origin.shouldCollide(other)) {
+				return -1;
+			}
 
 			found = true;
 
 			first = (WorldObject) fixture.getBody().getUserData();
 			x = point.x;
 			y = point.y;
-			return 0;
+			return fraction;
 		}
 	}
 

@@ -1,8 +1,5 @@
 package main;
 
-import java.util.Arrays;
-
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
@@ -30,6 +27,19 @@ public class GameWorldRenderer {
 
 	public void render(float delta) {
 		Player player = worldManager.getPlayer();
+		
+		shapeRenderer.setColor(1f, 0f, 0, 1f);
+		shapeRenderer.setAutoShapeType(true);
+		shapeRenderer.setProjectionMatrix(worldManager.getCamera().combined);
+		shapeRenderer.begin(ShapeType.Filled);
+		
+		float[] points = worldManager.getVisionPolygon();
+		for (int i = 0; i < points.length; i += 2) {
+			shapeRenderer.circle(points[i], points[i + 1], 0.05f, 10);
+		}
+		shapeRenderer.polygon(points);
+
+		shapeRenderer.end();
 
 		spriteBatch.setProjectionMatrix(worldManager.getCamera().combined);
 		spriteBatch.begin();
@@ -52,18 +62,6 @@ public class GameWorldRenderer {
 			}
 		}
 		spriteBatch.end();
-
-		shapeRenderer.setColor(1f, 0f, 0, 1f);
-		shapeRenderer.setAutoShapeType(true);
-		shapeRenderer.setProjectionMatrix(worldManager.getCamera().combined);
-		shapeRenderer.begin();
-		float[] points = worldManager.getVisionPolygon();
-		for (int i = 0; i < points.length; i += 2) {
-			shapeRenderer.circle(points[i], points[i + 1], 0.05f, 10);
-		}
-		shapeRenderer.polygon(points);
-
-		shapeRenderer.end();
 
 		debugRenderer.render(worldManager.getGameWorld().getWorld(), worldManager.getCamera().combined);
 	}
