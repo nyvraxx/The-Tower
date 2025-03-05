@@ -12,18 +12,14 @@ import com.badlogic.gdx.utils.ObjectSet;
 import entities.WorldObject;
 
 public class ViewingFrustrum {
-	private Array<WorldObject> visible = new Array<>();
-	ObjectSet<WorldObject> seen = new ObjectSet<>();
+	private Array<Fixture> visible = new Array<>();
+	private Array<WorldObject> visibleWorldObjects = new Array<>();
+	private ObjectSet<WorldObject> seenWorldObjects = new ObjectSet<>();
 
 	private QueryCallback callback = new QueryCallback() {
 		@Override
 		public boolean reportFixture(Fixture fixture) {
-			WorldObject worldObject = (WorldObject) fixture.getBody().getUserData();
-
-			if (seen.add(worldObject)) {
-				visible.add(worldObject);
-			}
-
+			visible.add(fixture);
 			return true;
 		}
 	};
@@ -31,7 +27,7 @@ public class ViewingFrustrum {
 	Vector3 lowerLeft = new Vector3();
 	Vector3 upperRight = new Vector3();
 
-	public void update(Camera camera) {
+	public void updateCamera(Camera camera) {
 		lowerLeft.set(0, Gdx.graphics.getHeight(), 0);
 		upperRight.set(Gdx.graphics.getWidth(), 0, 0);
 
@@ -41,12 +37,20 @@ public class ViewingFrustrum {
 
 	public void updateVisible(World world) {
 		visible.clear();
-		seen.clear();
+		visibleWorldObjects.clear();
+		seenWorldObjects.clear();
 
-		world.QueryAABB(this.callback, left(), lower(), right(), upper());
+		world.QueryAABB(callback, left(), lower(), right(), upper());
+
+		for (Fixture fixture : visible) {
+			WorldObject worldObject = (WorldObject) fixture.getBody().getUserData();
+			if (seenWorldObjects.add(worldObject)) {
+				visibleWorldObjects.add(worldObject);
+			}
+		}
 	}
 
-	public Array<WorldObject> getVisible() {
+	public Array<Fixture> getVisible() {
 		return visible;
 	}
 
@@ -64,5 +68,9 @@ public class ViewingFrustrum {
 
 	public float upper() {
 		return upperRight.y;
+	}
+
+	public Array<WorldObject> getVisibleWorldObjects() {
+		return visibleWorldObjects;
 	}
 }

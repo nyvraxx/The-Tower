@@ -15,7 +15,9 @@ public class Player extends Entity {
 	private float walkAcceleration;
 	private float runAcceleration;
 	private float staminaChargeRate;
-
+	
+	private float sightRange;
+	
 	boolean running = false;
 	private static BodyDef defaultBodyDef;
 
@@ -48,6 +50,8 @@ public class Player extends Entity {
 	public Player() {
 		super();
 
+		setSightRange(3f);
+		
 		walkAcceleration = 1f;
 		runAcceleration = 2.1f;
 		staminaChargeRate = 0.3f;
@@ -105,6 +109,14 @@ public class Player extends Entity {
 		sprite.setPosition(pos.x - 0.2f, pos.y - 0.2f);
 		sprite.setSize(0.4f, 0.4f);
 		sprite.setRotation(MathUtils.radiansToDegrees * transform.getRotation());
+	}
+
+	public float getSightRange() {
+		return sightRange;
+	}
+
+	public void setSightRange(float sightRange) {
+		this.sightRange = sightRange;
 	}
 
 }

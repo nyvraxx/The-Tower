@@ -25,7 +25,7 @@ public class LevelTracker implements Cloneable {
 	}
 
 	private int getRoundedLevel() {
-		if (fraction >= 0.5)
+		if (fraction >= 0.5 || fraction == Middle)
 			return level + 1;
 		else
 			return level;
@@ -42,7 +42,7 @@ public class LevelTracker implements Cloneable {
 		LevelTracker levB = other;
 
 		if (levA.onStairs && levB.onStairs) {
-			return levA.level == levB.level;
+			return levA.getRoundedLevel() == levB.getRoundedLevel() || levA.level == levB.level;
 		} else if (levA.onStairs && !levB.onStairs) {
 			if (levA.getRoundedLevel() == levB.level)
 				return true;
@@ -82,6 +82,7 @@ public class LevelTracker implements Cloneable {
 		}
 	}
 
+	@Override
 	public LevelTracker clone() {
 		LevelTracker levelTracker = new LevelTracker();
 

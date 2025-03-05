@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.QueryCallback;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -32,7 +34,7 @@ public class WorldManager {
 	GameWorld gameWorld;
 	OrthographicCamera camera;
 	FitViewport viewport;
-private Couch couch;
+
 	private float viewWidth = 16f * 0.45f, viewHeight = 10f * 0.45f;
 
 	public WorldManager() {
@@ -67,7 +69,6 @@ private Couch couch;
 		}
 		for (int i = 0; i < 1; i++) {
 			Entity entity = new Couch(0.3f, 0.6f);
-			couch= (Couch) entity;
 			entity.getLevelTracker().level = 0;
 			gameWorld.add(entity);
 			entity.getBody().setTransform(MathUtils.random(2), MathUtils.random(2), MathUtils.random(MathUtils.PI));
@@ -89,7 +90,7 @@ private Couch couch;
 			Stair platform = new Stair(0, 0.8f, 1f);
 			gameWorld.add(platform);
 			platform.getBody().setTransform(-1, 1, 0f);
-			platform.generateBarriers(gameWorld, 0.01f);
+			platform.generateBarriers(gameWorld, 0.03f);
 		}
 		{
 			Barrier barrier = new Barrier(1f, .01f);
@@ -114,13 +115,12 @@ private Couch couch;
 	}
 
 	public void update(float delta) {
-		System.out.println(couch.getLevelTracker());
 		gameWorld.update(delta);
 
 		Vector2 playerPos = player.getBody().getPosition();
 		camera.position.lerp(new Vector3(playerPos.x, playerPos.y, 0), 18f * delta);
 		camera.update();
-		viewingFrustrum.update(camera);
+		viewingFrustrum.updateCamera(camera);
 
 		updateVisible();
 	}
@@ -198,38 +198,65 @@ private Couch couch;
 
 		float x = playerPos.x;
 		float y = playerPos.y;
-		float r = 10f;
+		float r = player.getSightRange();
 
-		final float epsilonOffset = 0.001f;
+		final float epsilon = 0.001f;
 		viewingFrustrum.updateVisible(gameWorld.world);
 
-		for (WorldObject visible : viewingFrustrum.getVisible()) {
-			if (!visible.blocksVision()) {
-				continue;
+		gameWorld.world.QueryAABB(new QueryCallback() {
+			@Override
+			public boolean reportFixture(Fixture fixture) {
+				WorldObject worldObject = (WorldObject) fixture.getBody().getUserData();
+
+				if (!worldObject.blocksVision()) {
+					return true;
+				}
+				if (!player.getLevelTracker().isVisible(worldObject.getLevelTracker())) {
+					return true;
+				}
+				if (worldObject == player) {
+					return true;
+				}
+
+				Vector2 result1 = new Vector2();
+				Vector2 result2 = new Vector2();
+				Vector2 diff = new Vector2();
+				GeometryUtils.getEdges(fixture, (vec1, vec2) -> {
+					GeometryUtils.getCircleEdgeIntersection(vec1, vec2, playerPos, r, result1, result2);
+
+					if (!Float.isNaN(result1.x)) {
+						visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, result1.x, result1.y, r));
+					}
+					if (!Float.isNaN(result2.x)) {
+						visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, result2.x, result2.y, r));
+					}
+
+					Vector2 vertex = vec1;
+
+					diff.set(vertex.x - x, vertex.y - y);
+
+					if (diff.len2() > r * r)
+						return;
+
+					visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, vertex.x, vertex.y, r));
+
+					diff.rotateRad(epsilon);
+					visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+					diff.rotateRad(epsilon);
+					visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+
+					diff.set(vertex.x - x, vertex.y - y);
+					diff.rotateRad(-epsilon);
+					visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+					diff.rotateRad(-epsilon);
+					visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
+				});
+
+				return true;
 			}
-			if (!player.getLevelTracker().isVisible(visible.getLevelTracker())) {
-				continue;
-			}
+		}, x - r, y - r, x + r, y + r);
 
-			GeometryUtils.getVertices(visible.getBody(), vec -> {
-				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, vec.x, vec.y, r));
-
-				Vector2 diff = new Vector2(vec.x - x, vec.y - y);
-
-				diff.rotateRad(epsilonOffset);
-				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
-				diff.rotateRad(epsilonOffset);
-				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
-
-				diff.set(vec.x - x, vec.y - y);
-				diff.rotateRad(-epsilonOffset);
-				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
-				diff.rotateRad(-epsilonOffset);
-				visionPolygon.add(raycaster.shootRay(rayLevelTracker, x, y, x + diff.x, y + diff.y, r));
-			});
-		}
-
-		int numFree = 16;
+		int numFree = 32;
 		for (int i = 0; i < numFree; i++) {
 			float angle = i * MathUtils.PI2 / numFree;
 			float normX = MathUtils.cos(angle);

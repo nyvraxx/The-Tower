@@ -39,7 +39,7 @@ public class GameWorldRenderer {
 		spriteBatch.begin();
 
 		float[] points = worldManager.getVisionPolygon();
-		Array<WorldObject> onScreen = worldManager.getViewingFrustrum().getVisible();
+		Array<WorldObject> onScreen = worldManager.getViewingFrustrum().getVisibleWorldObjects();
 		for (WorldObject worldObject : onScreen) {
 			if (!worldManager.isVisible(worldObject))
 				continue;
@@ -64,7 +64,7 @@ public class GameWorldRenderer {
 		shapeRenderer.begin();
 		shapeRenderer.polygon(points);
 		shapeRenderer.end();
-
+//
 //		shapeRenderer.setProjectionMatrix(worldManager.getCamera().combined);
 //		shapeRenderer.setColor(1, 0, 0, 1);
 //		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -84,7 +84,7 @@ public class GameWorldRenderer {
 //			shapeRenderer.circle(points[i], points[i + 1], 0.05f, 10);
 //		}
 //		shapeRenderer.end();
-
+//
 		Gdx.gl.glEnable(GL20.GL_STENCIL_TEST);
 		Gdx.gl.glColorMask(false, false, false, false); // Disable color writing
 		Gdx.gl.glStencilFunc(GL20.GL_ALWAYS, 1, 0xFF); // Always pass stencil test

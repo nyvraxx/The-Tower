@@ -112,6 +112,11 @@ public class VectorArray {
 		return arr;
 	}
 
+	/**
+	 * 
+	 * @param vector2
+	 * @apiNote the reference is not retained
+	 */
 	public void add(Vector2 vector2) {
 		add(vector2.x, vector2.y);
 	}

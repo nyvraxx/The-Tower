@@ -5,13 +5,12 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Transform;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectSet;
 
 import world.GameWorld;
 
 public class Stair extends Platform {
-	Array<Entity> inContact = new Array<>();
+	ObjectSet<Entity> inContact = new ObjectSet<>();
 	ObjectSet<Entity> contained = new ObjectSet<>();
 
 	Fixture base;
@@ -31,18 +30,18 @@ public class Stair extends Platform {
 		levelTracker.fraction = LevelTracker.Middle;
 	}
 
-	public void generateBarriers(GameWorld gameWorld, float thickness) {
-		Barrier bottomNorth = new Barrier(hWidth, thickness);
-		Barrier bottomSouth = new Barrier(hWidth, thickness);
-		Barrier bottomEast = new Barrier(thickness, hHeight);
+	public void generateBarriers(GameWorld gameWorld, float epsilon) {
+		Barrier bottomNorth = new Barrier(hWidth, epsilon);
+		Barrier bottomSouth = new Barrier(hWidth, epsilon);
+		Barrier bottomEast = new Barrier(epsilon, hHeight);
 
 		bottomNorth.getLevelTracker().level = getLevelTracker().level;
 		bottomSouth.getLevelTracker().level = getLevelTracker().level;
 		bottomEast.getLevelTracker().level = getLevelTracker().level;
 
-		Barrier topNorth = new Barrier(hWidth, thickness);
-		Barrier topSouth = new Barrier(hWidth, thickness);
-		Barrier topWest = new Barrier(thickness, hHeight);
+		Barrier topNorth = new Barrier(hWidth, epsilon);
+		Barrier topSouth = new Barrier(hWidth, epsilon);
+		Barrier topWest = new Barrier(epsilon, hHeight);
 
 		topNorth.getLevelTracker().level = getLevelTracker().level + 1;
 		topSouth.getLevelTracker().level = getLevelTracker().level + 1;
@@ -77,8 +76,8 @@ public class Stair extends Platform {
 		if (!(other instanceof Entity)) {
 			return;
 		}
-		Entity entity = (Entity)other;
-		
+		Entity entity = (Entity) other;
+
 		entity.getLevelTracker().level = getLevelTracker().level;
 		entity.getLevelTracker().fraction = getFraction(entity);
 
@@ -95,9 +94,9 @@ public class Stair extends Platform {
 		if (!(other instanceof Entity)) {
 			return;
 		}
-		
-		Entity entity = (Entity)other;
-		
+
+		Entity entity = (Entity) other;
+
 		int dir = getDir(entity);
 
 		if (dir == 1) {
@@ -110,7 +109,7 @@ public class Stair extends Platform {
 		}
 
 		other.getLevelTracker().onStairs = false;
-		inContact.removeValue((Entity) other, false);
+		inContact.remove((Entity) other);
 	}
 
 	// -1 for bottom, +1 for top
@@ -130,7 +129,7 @@ public class Stair extends Platform {
 
 		float fraction = (projection / (2 * hWidth)) + 0.5f;
 
-		return MathUtils.clamp(fraction, 0f, 1f);
+		return MathUtils.clamp(fraction, 0, 1);
 	}
 
 	@Override
@@ -144,17 +143,24 @@ public class Stair extends Platform {
 					beginContainment(entity);
 				}
 
-				entity.getLevelTracker().fraction = getFraction(entity);
+				float pFraction = entity.getLevelTracker().fraction;
+				float fraction = getFraction(entity);
+				entity.getLevelTracker().fraction = fraction;
+
+				float min = Math.min(pFraction, fraction);
+				float max = pFraction + fraction - min;
+
+				if (min <= 0.5 && 0.5f <= max) {
+					for (Fixture fixture : entity.getBody().getFixtureList()) {
+						fixture.refilter();
+					}
+				}
 			} else {
 				boolean removed = contained.remove(entity);
 
 				if (removed) {
 					endContainment(entity);
 				}
-			}
-			
-			for(Fixture fixture :entity.getBody().getFixtureList()) {
-				fixture.refilter();
 			}
 		}
 	}
